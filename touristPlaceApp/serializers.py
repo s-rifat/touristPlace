@@ -4,7 +4,7 @@ import os
 
 class PlaceSerializer(serializers.ModelSerializer):
     created_by = serializers.ReadOnlyField(source='created_by.username')
-    image = serializers.ImageField(required=False)  # make the field optional
+    image = serializers.ImageField(required=False)
     remove_image = serializers.BooleanField(write_only=True, required=False, default=False)
 
 
