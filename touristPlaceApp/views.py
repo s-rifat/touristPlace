@@ -7,7 +7,6 @@ from rest_framework.pagination import PageNumberPagination
 
 # Create your views here.
 
-# Simple pagination: 5 places per page
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 5
     page_size_query_param = 'page_size'
@@ -21,7 +20,6 @@ class PlaceViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'created_at']
     ordering = ['-created_at']
 
-    # Automatically set the creator when creating
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
