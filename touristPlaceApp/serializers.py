@@ -1,32 +1,53 @@
 from rest_framework import serializers
-from .models import Place
+from .models import Place, PlaceImage
 import os
+
+class PlaceImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaceImage
+        fields = ['id', 'image', 'uploaded_at']
 
 class PlaceSerializer(serializers.ModelSerializer):
     created_by = serializers.ReadOnlyField(source='created_by.username')
-    image = serializers.ImageField(required=False)
-    remove_image = serializers.BooleanField(write_only=True, required=False, default=False)
-
+    images = PlaceImageSerializer(many=True, read_only=True)
+    new_images = serializers.ListField(
+        child=serializers.ImageField(), write_only=True, required=False
+    )
+    remove_image_ids = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True, required=False
+    )
+    delete_all_images = serializers.BooleanField(write_only=True, required=False, default=False)
 
     class Meta:
         model = Place
-        fields = ['id', 'name', 'location', 'country', 'description', 'image', 
-        'remove_image', 'created_by', 'created_at', 'updated_at']
-    
-    def update(self, instance, validated_data):
-        # Check if remove_image is True
-        if validated_data.pop('remove_image', False):
-            # Delete the old file
-            if instance.image and os.path.isfile(instance.image.path):
-                os.remove(instance.image.path)
-            instance.image = None
+        fields = [
+            'id', 'name', 'location', 'country', 'description',
+            'images', 'new_images', 'remove_image_ids', 'delete_all_images',
+            'created_by', 'created_at', 'updated_at'
+        ]
 
-        # Update the image if a new file is provided
-        if 'image' in validated_data:
-            # Delete old image if it exists
-            if instance.image and os.path.isfile(instance.image.path):
-                os.remove(instance.image.path)
-            instance.image = validated_data.get('image', instance.image)
+    def update(self, instance, validated_data):
+        # Remove specific images
+        remove_ids = validated_data.pop('remove_image_ids', [])
+        PlaceImage.objects.filter(id__in=remove_ids, place=instance).delete()
+
+        # Remove all images if flagged
+        if validated_data.pop('delete_all_images', False):
+            instance.images.all().delete()
+
+        # Add new images
+        new_images = validated_data.pop('new_images', [])
+        for img in new_images:
+            PlaceImage.objects.create(place=instance, image=img)
 
         return super().update(instance, validated_data)
+
+    def create(self, validated_data):
+        new_images = validated_data.pop('new_images', [])
+        validated_data.pop('delete_all_images', None)
+        validated_data.pop('remove_image_ids', None)
+        place = super().create(validated_data)
+        for img in new_images:
+            PlaceImage.objects.create(place=place, image=img)
+        return place
 
