@@ -1,39 +1,42 @@
-# Tourist Place API
+"""
+URL configuration for touristPlace project.
 
-A simple Django REST Framework API to manage tourist places.
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/6.0/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+from django.contrib import admin
+from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
 
----
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Tourist Place API",
+      default_version='v1',
+      description="API documentation for Tourist Place assignment",
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
 
-## Features
-- User login required to create/update/delete places
-- View all places with pagination & ordering
-- CRUD operations: Create, Read, Update, Delete
-- Image upload with removal functionality
-- Swagger API documentation
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('touristPlaceApp.urls')),
+    path('api-auth/', include('rest_framework.urls')),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+]
 
----
-
-## Requirements / Versions
-- Python: 3.12.10
-- Django: 6.0.1
-- Django REST Framework: 3.16.1
-- drf-yasg (for Swagger)
-
----
-
-## Setup
-
-```bash
-git clone https://github.com/s-rifat/touristPlace.git
-cd touristPlace
-python -m venv env
-# Windows
-env\Scripts\activate
-# Mac/Linux
-source env/bin/activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
-
-
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
