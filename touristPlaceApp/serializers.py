@@ -1,6 +1,11 @@
 from rest_framework import serializers
-from .models import Place, PlaceImage
+from .models import Place, PlaceImage, Country
 import os
+
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = ['id', 'name']
 
 class PlaceImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,6 +22,7 @@ class PlaceSerializer(serializers.ModelSerializer):
         child=serializers.IntegerField(), write_only=True, required=False
     )
     delete_all_images = serializers.BooleanField(write_only=True, required=False, default=False)
+    country = serializers.PrimaryKeyRelatedField(queryset=Country.objects.all())
 
     class Meta:
         model = Place

@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, filters
-from .models import Place
-from .serializers import PlaceSerializer
-from .permissions import IsOwnerOrReadOnly
+from .models import Country, Place
+from .serializers import CountrySerializer, PlaceSerializer
+from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 from rest_framework.pagination import PageNumberPagination
 
 # Create your views here.
@@ -22,4 +22,10 @@ class PlaceViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+
+class CountryViewSet(viewsets.ModelViewSet):
+    queryset = Country.objects.all()
+    serializer_class = CountrySerializer
+    permission_classes = [IsAdminOrReadOnly] 
 
