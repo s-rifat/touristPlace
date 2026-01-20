@@ -8,7 +8,7 @@ A simple Django REST Framework API to manage tourist places.
 - User login required to create/update/delete places
 - View all places with pagination & ordering
 - CRUD operations: Create, Read, Update, Delete
-- Image upload with optional removal
+- Image upload with removal functionality
 - Swagger API documentation
 
 ---
@@ -35,3 +35,4 @@ pip install -r requirements.txt
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
+
